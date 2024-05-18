@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title> 正则表达式测试工具 </title>
+	<meta name="author" content="白一梓(yunnysunny@gmail.com)">
+	<meta name="keywords" content="正则表达式测试工具">
+	<meta name="description" content="简易的正则表达式测试工具，白一梓制作">
+	<style>
+		body {
+			font-size:13px;
+			color:#3366FF;
+		}
+		.right {
+			color:#005500;
+		}
+		.wrong {
+			color:#CC0033;
+		}
+		#container {
+			margin:auto;
+		}
+		#container table {
+			margin:auto;			
+			width:550px;
+			border:1px solid;
+		}
+		#container h2 {
+			text-align:center;
+		}
+		#container fieldset {
+			width:530px;
+			margin:auto;
+			padding:10;
+			border:1px solid;
+		}
+		#container div {
+			margin:auto;
+			text-align:center;
+		}
+		.margin {
+			height:20px;
+		}
+		#footer {
+			margin:auto;text-align:center;
+		}
+	</style>
+	<script language="javascript">
+		String.prototype.Trim = function()
+		{
+			return this.replace(/(^\s*)|(\s*$)/g, "");
+		}
+		String.prototype.LTrim = function()
+		{
+			return this.replace(/(^\s*)/g, "");
+		}
+		String.prototype.RTrim = function()
+		{
+			return this.replace(/(\s*$)/g, "");
+		}
+		function setCookie(name,value,expires,path,domain,secure)
+		{
+			var expDays = expires*24*60*60*1000;
+			var expDate = new Date();
+			expDate.setTime(expDate.getTime()+expDays);
+			var expString = ((expires==null) ? "": (";expires="+expDate.toGMTString()));
+			var pathString = ((path==null) ? "": (";path="+path));
+			var domainString = ((domain==null) ? "": (";domain="+domain));
+			var secureString = ((secure==true) ? ";secure": "");
+			document.cookie = name + "="+ escape(value) + expString + pathString + domainString + secureString;
+		}
+		
+
+		function getCookie(name)
+		{
+			var result = null;
+			var myCookie = document.cookie + ";";
+			var searchName = name + "=";
+			var startOfCookie = myCookie.indexOf(searchName);
+			var endOfCookie;
+			if (startOfCookie != -1)
+			{
+				startOfCookie += searchName.length;
+				endOfCookie = myCookie.indexOf(";",startOfCookie);
+				result = unescape(myCookie.substring(startOfCookie,endOfCookie));
+			}
+			return result;
+		}
+		var $ = function(id) {
+			return document.getElementById(id);
+		}
+		function addLoadEvent(func) {
+			var oldonload= window.onload;
+			if(typeof window.onload!='function') {
+				window.onload=func;
+			} else {
+				window.onload=function() {
+					oldonload();
+					func();
+				}
+			}
+		}
+		//////////////////////////////////////////////////////////////
+		var COOKIE_LAST_REG = 'lastReg';
+		var COOKIE_LAST_TEXT = 'lastText';
+		function testReg() {//根据输入的正则表达式进行验证
+			var regText = $('regArea').value.Trim();//正则表达式内容
+			setCookie(COOKIE_LAST_REG,regText);
+			var regCtrl = '';
+			if (!$('distingush').checked)
+			{
+				regCtrl += 'i';
+			}
+			if($('mutilChoice').checked) {
+				regCtrl += 'm';
+			}
+			
+			var reg = new RegExp(regText,regCtrl);
+			var text = $('testText').value;//要验证的文本
+			setCookie(COOKIE_LAST_TEXT, text);
+			var resultArea = $('resultArea');
+			if($('showMatch').checked) {
+				var result = text.match(reg);
+				if (result == null) {
+					resultArea.innerHTML = "<span class='wrong'>匹配失败</span>";
+				} else {
+					var html = '<span class="right">匹配到的子选项:</span>';
+					html += '<ul>';
+					for(var i=1,len=result.length;i<len;i++) {
+						html += '<li>' + result[i] + '</li>';
+					}
+					html += '</ul>'
+					resultArea.innerHTML = html;
+				}
+			} else {
+				if (reg.test(text))
+				{
+					resultArea.innerHTML = "<span class='right'>匹配成功</span>";
+				}
+				else 
+				{
+					resultArea.innerHTML = "<span class='wrong'>匹配失败</span>";
+				}
+			}
+			
+			return true;
+		}
+		function init() {
+			var lastText = getCookie(COOKIE_LAST_TEXT);
+			if (lastText) {				
+				$('testText').value = lastText;
+			}
+			var lastReg = getCookie(COOKIE_LAST_REG);
+			if (lastReg) {
+				$('regArea').value = lastReg;
+			}
+		}
+		addLoadEvent(init);
+	</script>
+
+</head>
+
+<body>
+	<div id="container">
+		<h2>正则表达式测试</h2>
+		<table>
+			<tbody><tr>
+				<td>正则表达式：</td>
+				<td>
+					<textarea cols="50" rows="5" value="" id="regArea"></textarea>
+					<input type="button" value="验证" id="testReg" onclick="testReg();">
+				</td>
+			</tr>
+			<tr>
+				<td>待检验的文本：</td>
+				<td><textarea cols="50" rows="5" value="" id="testText"></textarea></td>
+			</tr>	
+			<tr>
+				<td></td>
+				<td style="">
+					
+				</td>
+			</tr>
+		</tbody></table>
+		<fieldset>
+			<legend>匹配规则</legend>
+			<input type="radio" name="upDown" id="distingush" value="0">区分大小写
+			<input type="radio" name="upDown" value="1" checked="">不区分大小写<br />
+			<input type="radio" name="mutil" id="mutilChoice" value="1">多行模式
+			<input type="radio" name="mutil" value="0" checked="">单行模式<br />			
+		</fieldset>
+		<fieldset>
+			<legend>结果显示</legend>
+			<input type="checkbox" name="showMatch" id="showMatch" />显示匹配项
+		</fieldset>
+		<div class="margin"></div>
+		<div id="resultArea"></div>
+		
+		<div id="debug"></div>
+	</div>
+	<div class="margin"></div>
+	<div id="footer">
+		<a href="http://git.oschina.net/yunnysunny/jsreg" target="_blank">fork me on oschina</a>
+	</div>
+
+
+</body></html>
